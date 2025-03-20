@@ -1,14 +1,11 @@
 cmake_minimum_required(VERSION 3.15...3.31)
+include(cmake/properties.cmake)
 
 project(
   EKG-SANDBOX
   VERSION 1.0.0
   LANGUAGES CXX
 )
-
-if(EKG_DEVELOPER_MODE)
-  set(EKG_DIR "../ekg-cmake-install/lib/cmake/ekg")
-endif()
 
 find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -29,8 +26,13 @@ set_target_properties(
   CXX_STANDARD 17
 )
 
+target_compile_options(
+  ekg-showcase PRIVATE
+  ${PROPERTIES_COMPILE_OPTIONS}
+)
+
 target_link_libraries(
-  ekg-showcase PUBLIC
+  ekg-showcase PRIVATE
   SDL2::SDL2
   SDL2::SDL2main
   OpenGL::GL
@@ -38,13 +40,4 @@ target_link_libraries(
   Freetype::Freetype
   EKG::ekg
   -static-libgcc -static-libstdc++
-)
-
-target_include_directories(
-  ekg-showcase PUBLIC
-  ${SDL2_INCLUDE_DIRS}
-  ${OPENGL_INCLUDE_DIRS}
-  ${GLEW_INCLUDE_DIRS}
-  ${FREETYPE_INCLUDE_DIRS}
-  ${EKG_INCLUDE_DIRS}
 )
