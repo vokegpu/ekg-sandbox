@@ -1,50 +1,50 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15...3.31)
 
-message(STATUS "EKG tests enabled")
-message(STATUS "EKG GUI showcase test building")
-
-project(ekg-gui-showcase-test)
-
-if(
-    CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
-    OR
-    CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-  )
-  add_compile_options(-O3)
-endif()
-
-if (WIN32)
-  set(PLATFORM               "windows")
-  set(EXECUTABLE_OUTPUT_PATH ../bin/)
-else()
-  # Enable if your base OS is Debian-based (e.g Ubuntu).
-  # It is a common issue related by the Linux community.
-  if (EKG_LINUX_NOT_FOUND_FREETYPE)
-    include_directories(/usr/include/freetype2)
-    message(STATUS "Using var EKG_LINUX_NOT_FOUND_FREETYPE to include `/usr/include/freetype2` directly")
-  endif()
-
-  set(PLATFORM               "linux")
-  set(EXECUTABLE_OUTPUT_PATH ../bin/)
-endif()
-
-include_directories(../include)
-add_executable(ekg-gui-showcase-test "src/ekg_gui_showcase_test.cpp")
-
-file(GLOB LIBRARY_PATH "../lib/${PLATFORM}/libekg.a")
-message(STATUS "EKG GUI test found native library on: ${LIBRARY_PATH}")
-
-if (WIN32)
-  set(THIRD_PARTY_LIBRARIES mingw32 SDL2main SDL2 opengl32 glew32 freetype)
-else()
-  set(THIRD_PARTY_LIBRARIES SDL2main SDL2 GL GLEW freetype)
-endif()
-
-target_link_libraries(
-  ekg-gui-showcase-test
-  ${LIBRARY_PATH}
-  ${THIRD_PARTY_LIBRARIES}
-  -static-libgcc -static-libstdc++    
+project(
+  EKG-SANDBOX
+  VERSION 1.0.0
+  LANGUAGES CXX
 )
 
-message(STATUS "EKG GUI showcase test building done")
+if(EKG_DEVELOPER_MODE)
+  set(EKG_DIR "../ekg-cmake-install/lib/cmake/ekg")
+endif()
+
+find_package(SDL2 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(EKG REQUIRED)
+
+add_executable(
+  ekg-showcase
+  src/ekg-showcase.cpp
+  src/application.hpp
+)
+
+message("${EKG_INCLUDE_DIRS}")
+
+set_target_properties(
+  ekg-showcase PROPERTIES
+  CXX_STANDARD 17
+)
+
+target_link_libraries(
+  ekg-showcase PUBLIC
+  SDL2::SDL2
+  SDL2::SDL2main
+  OpenGL::GL
+  GLEW::GLEW
+  Freetype::Freetype
+  EKG::ekg
+  -static-libgcc -static-libstdc++
+)
+
+target_include_directories(
+  ekg-showcase PUBLIC
+  ${SDL2_INCLUDE_DIRS}
+  ${OPENGL_INCLUDE_DIRS}
+  ${GLEW_INCLUDE_DIRS}
+  ${FREETYPE_INCLUDE_DIRS}
+  ${EKG_INCLUDE_DIRS}
+)
