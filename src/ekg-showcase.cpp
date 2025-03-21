@@ -29,7 +29,7 @@ int32_t main(int32_t, char**) {
   glewInit();
 
   app.is_running = true;
-  ekg::vec3_t<float> clear_color {1.0f, 1.0f, 1.0f};
+  ekg::vec3_t<float> clear_color {0.0345234234f, 0.234234234f, 0.54645f};
 
   ekg::runtime_property_t ekg_runtime_property {
     .font_path = "./comic-mono.ttf",
@@ -127,7 +127,7 @@ int32_t main(int32_t, char**) {
 
     ekg::update();
 
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0f);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, 0.1f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0.0f, 0.0f, ekg::viewport.w, ekg::viewport.h);
 

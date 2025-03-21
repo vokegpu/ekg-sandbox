@@ -1,3 +1,6 @@
+set(EKG_SHOWCASE_VERSION 1.0.0)
+set(EXECUTABLE_OUTPUT_PATH "../bin")
+
 if(EKG_DEVELOPER_MODE)
   set(EKG_DIR "../ekg-cmake-install/lib/cmake/ekg")
 endif()
