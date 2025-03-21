@@ -13,13 +13,13 @@ find_package(GLEW REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(EKG REQUIRED)
 
+message(STATUS "Building EKG sandbox")
+
 add_executable(
   ekg-showcase
   src/ekg-showcase.cpp
   src/application.hpp
 )
-
-message("${EKG_INCLUDE_DIRS}")
 
 set_target_properties(
   ekg-showcase PROPERTIES
@@ -41,3 +41,5 @@ target_link_libraries(
   EKG::ekg
   -static-libgcc -static-libstdc++
 )
+
+message(STATUS "EKG sandbox building done!")
