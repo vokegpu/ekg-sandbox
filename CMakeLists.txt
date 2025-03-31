@@ -3,7 +3,7 @@ include(cmake/properties.cmake)
 
 project(
   EKG-SANDBOX
-  VERSION ${EKG_SANDBOX_VERSION}
+  VERSION 1.0.0
   LANGUAGES CXX
 )
 

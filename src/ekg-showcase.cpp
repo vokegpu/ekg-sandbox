@@ -1,10 +1,159 @@
 #include <iostream>
 
 #include "application.hpp"
+#include "ekg/io/text.hpp"
 #include <ekg/os/ekg_opengl.hpp>
 #include <ekg/draw/shape.hpp>
 
 application_t app {};
+std::vector<ekg::sampler_t> loaded_sampler_list {};
+
+void generate_char_sampler(ekg::sampler_t *p_sampler, std::string_view c, ekg::io::font_face_type font_face_type) {
+  ekg::draw::font_renderer &f_renderer {ekg::draw::get_font_renderer(ekg::font::normal)};
+
+  uint32_t previous_size {f_renderer.font_size};
+  f_renderer.set_size(512);
+
+  // 🐮
+  // ✔
+
+  ekg::io::font_face_t &typography_font_face {f_renderer.faces[font_face_type]};
+
+  FT_Load_Char(
+    typography_font_face.ft_face,
+    ekg::utf_string_to_char32(c),
+    FT_LOAD_RENDER | FT_LOAD_COLOR | FT_LOAD_DEFAULT
+  );
+
+  f_renderer.set_size(previous_size);
+
+  ekg::sampler_allocate_info_t sampler_alloc_info {};
+
+  sampler_alloc_info.w = static_cast<int32_t>(typography_font_face.ft_face->glyph->bitmap.width);
+  sampler_alloc_info.h = static_cast<int32_t>(typography_font_face.ft_face->glyph->bitmap.rows);
+
+  sampler_alloc_info.gl_wrap_modes[0] = GL_REPEAT;
+  sampler_alloc_info.gl_wrap_modes[1] = GL_REPEAT;
+  sampler_alloc_info.gl_parameter_filter[0] = GL_LINEAR;
+  sampler_alloc_info.gl_parameter_filter[1] = GL_LINEAR;
+  sampler_alloc_info.gl_internal_format = GL_RGBA;
+  sampler_alloc_info.gl_format = GL_BGRA;
+  sampler_alloc_info.gl_type = GL_UNSIGNED_BYTE;
+  sampler_alloc_info.gl_generate_mipmap = GL_TRUE;
+  sampler_alloc_info.p_data = typography_font_face.ft_face->glyph->bitmap.buffer;
+
+  ekg::gpu_allocate_sampler(
+    &sampler_alloc_info,
+    p_sampler
+  );
+}
+
+void test_pixel_imperfect() {
+  ekg::make(
+    ekg::frame_t {
+      .tag = "first frame",
+      .rect = {500.0f, 200.0f, 200.0f, 200.0f},
+      .drag_dock = ekg::dock::top,
+      .resize_dock = ekg::dock::left | ekg::dock::bottom | ekg::dock::right
+    }
+  );
+
+  ekg::theme().button.background = ekg::color<int32_t>(255, 255, 255, 100);
+
+  ekg::button_t button {};
+  
+  button.tag = "0";
+  button.text = "moo moo";
+  button.text_dock = ekg::dock::left;
+  button.dock = ekg::dock::left | ekg::dock::fill;
+  ekg::make(button);
+  
+  button.tag = "bt-2";
+  button.text = "owlf olwf";
+  button.text_dock = ekg::dock::center;
+  button.dock = ekg::dock::fill;
+  ekg::make(button);
+  
+  button.tag = "1";
+  button.text = "i meow u~";
+  button.dock = ekg::dock::bottom | ekg::dock::right | ekg::dock::fill;
+  ekg::button_t &meow = ekg::make(button);
+  //meow.theme.text.w = 0.0f;
+  //meow.theme.background.w = 0.0f;
+
+  button.tag = "2";
+  button.text = "ok";
+  button.dock = ekg::dock::bottom | ekg::dock::right | ekg::dock::fill;
+  ekg::make(button);
+
+  button.tag = "2/1";
+  button.text = "meow";
+  button.dock = ekg::dock::bottom | ekg::dock::right;
+  ekg::make(button);
+
+  button.tag = "3";
+  button.text = "meow";
+  button.dock = ekg::dock::bottom | ekg::dock::right | ekg::dock::next | ekg::dock::fill;
+  ekg::make(button);
+
+
+  button.tag = "4";
+  button.text = "meow";
+  button.dock = ekg::dock::bottom | ekg::dock::right | ekg::dock::next | ekg::dock::fill;
+  ekg::make(button);
+
+  button.tag = "5";
+  button.text = "meow";
+  button.dock = ekg::dock::bottom | ekg::dock::right | ekg::dock::fill;
+  ekg::make(button);
+
+  button.tag = "3";
+  button.text = "ok";
+  button.dock = ekg::dock::bottom | ekg::dock::right | ekg::dock::next;
+
+  ekg::pop();
+}
+
+void test_widgets() {
+  ekg::sampler_t &check {loaded_sampler_list.emplace_back()};
+  generate_char_sampler(&check, "✔", ekg::io::font_face_type::text);
+
+  ekg::sampler_t &meow {loaded_sampler_list.emplace_back()};
+  generate_char_sampler(&meow, "🐈", ekg::io::font_face_type::emojis);
+
+  auto bla = ekg::frame_t {
+    .tag = "bla",
+    .rect = {500.0f, 200.0f, 200.0f, 200.0f},
+    .drag_dock = ekg::dock::top,
+    .resize_dock = ekg::dock::left | ekg::dock::bottom | ekg::dock::right
+  };
+
+  ekg::frame_t &oi = ekg::make(bla);
+  oi.theme.layers[ekg::layer::background] = &meow;
+
+  ekg::label_t label {};
+  label.tag = "idk";
+  label.text = "MEOW OWER MEOW";
+  label.dock = ekg::dock::fill;
+  label.text_dock = ekg::dock::center;
+  ekg::make(label);
+
+  ekg::button_t button {};
+  button.tag = "bt1";
+  button.text = "click hewe";
+  button.dock = ekg::dock::fill | ekg::dock::next;
+  ekg::make(button);
+
+  ekg::checkbox_t checkbox {};
+  checkbox.tag = "bt1";
+  checkbox.text = "must meow ✔";
+  checkbox.dock = ekg::dock::fill | ekg::dock::next;
+  ekg::checkbox_t &mustmeow = ekg::make(checkbox);
+
+  mustmeow.theme.layers[ekg::checkbox_t::box][ekg::layer::active] = &check;
+
+  ekg::pop();
+}
 
 int32_t main(int32_t, char**) {
   SDL_Init(SDL_INIT_VIDEO);
@@ -29,7 +178,7 @@ int32_t main(int32_t, char**) {
   glewInit();
 
   app.is_running = true;
-  ekg::vec3_t<float> clear_color {0.0345234234f, 0.234234234f, 0.54645f};
+  ekg::vec3_t<float> clear_color {0.345234234f, 0.234234234f, 0.54645f};
 
   ekg::runtime_property_t ekg_runtime_property {
     .font_path = "./comic-mono.ttf",
@@ -46,75 +195,10 @@ int32_t main(int32_t, char**) {
     ekg::dock::left | ekg::dock::bottom | ekg::dock::right
   };
 
-  /* new */
+  ekg::dpi.auto_scale = false;
+  ekg::dpi.scale = {0.0f, 0.0f, 800.0f, 600.0f};
 
-  ekg::make(
-    ekg::frame_t {
-      .tag = "first frame",
-      .rect = {500.0f, 200.0f, 200.0f, 200.0f},
-      .drag_dock = ekg::dock::top,
-      .resize_dock = ekg::dock::left | ekg::dock::bottom | ekg::dock::right
-    }
-  );
-
-  ekg::button_t button {};
-  
-  button.tag = "bt-1";
-  button.text = "moo moo";
-  button.text_dock = ekg::dock::left;
-  button.dock = ekg::dock::left;
-  ekg::make(button);
-  
-  button.tag = "bt-2";
-  button.text = "owlf olwf";
-  button.text_dock = ekg::dock::center;
-  button.dock = ekg::dock::fill;
-  ekg::make(button);
-  
-  button.tag = "bt-3";
-  button.text = "cancelar";
-  button.dock = ekg::dock::bottom | ekg::dock::right;
-  ekg::make(button);
-
-  button.tag = "bt-3";
-  button.text = "ok";
-  button.dock = ekg::dock::bottom | ekg::dock::right;
-  ekg::make(button);
-
-  button.tag = "bt-3";
-  button.text = "ok";
-  button.dock = ekg::dock::bottom | ekg::dock::right;
-  ekg::make(button);
-
-  ekg::pop();
-
-  auto bla = ekg::frame_t {
-    .tag = "bla",
-    .rect = {500.0f, 200.0f, 200.0f, 200.0f},
-    .drag_dock = ekg::dock::top,
-    .resize_dock = ekg::dock::left | ekg::dock::bottom | ekg::dock::right
-  };
-
-  bla.tag = "meow";
-  bla.rect = {340.0f, 20.0f, 200.0f, 200.0f};
-  //ekg::make(bla);
-  ekg::pop();
-
-  bla.tag = "moo";
-  bla.rect = {500.0f, 200.0f, 200.0f, 200.0f};
-  //ekg::make(bla);
-  ekg::pop();
-
-  /*
-  ekg::stack_t bla {
-    .tag = "idk",
-    .children = {
-      ekg::make<ekg::frame_t>(
-        {.tag = "bla", .rect = {20.0f, 20.0f, 200.0f, 200.0f}, .resize_dock = resize, .drag = ekg::dock::top}
-      )
-    }
-  };
-  */
+  test_widgets();
 
   while (app.is_running) {
     while (SDL_PollEvent(&sdl_event)) {
