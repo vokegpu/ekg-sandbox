@@ -6,7 +6,6 @@
 #include <ekg/draw/shape.hpp>
 
 application_t app {};
-std::vector<ekg::sampler_t> loaded_sampler_list {};
 
 void generate_char_sampler(ekg::sampler_t *p_sampler, std::string_view c, ekg::io::font_face_type font_face_type) {
   ekg::draw::font_renderer &f_renderer {ekg::draw::get_font_renderer(ekg::font::normal)};
@@ -27,7 +26,9 @@ void generate_char_sampler(ekg::sampler_t *p_sampler, std::string_view c, ekg::i
 
   f_renderer.set_size(previous_size);
 
-  ekg::sampler_allocate_info_t sampler_alloc_info {};
+  ekg::sampler_allocate_info_t sampler_alloc_info {
+    .p_tag = c.data()
+  };
 
   sampler_alloc_info.w = static_cast<int32_t>(typography_font_face.ft_face->glyph->bitmap.width);
   sampler_alloc_info.h = static_cast<int32_t>(typography_font_face.ft_face->glyph->bitmap.rows);
@@ -42,10 +43,17 @@ void generate_char_sampler(ekg::sampler_t *p_sampler, std::string_view c, ekg::i
   sampler_alloc_info.gl_generate_mipmap = GL_TRUE;
   sampler_alloc_info.p_data = typography_font_face.ft_face->glyph->bitmap.buffer;
 
-  ekg::gpu_allocate_sampler(
-    &sampler_alloc_info,
-    p_sampler
-  );
+  if (
+      ekg::has(
+        ekg::gpu_allocate_sampler(
+          &sampler_alloc_info,
+          p_sampler
+        ),
+        ekg::result::failed
+      )
+    ) {
+    ekg::log() << "FAILED TO ALLOCATE SAMPLER ID: " << sampler_alloc_info.p_tag;
+  };
 }
 
 void test_pixel_imperfect() {
@@ -115,10 +123,13 @@ void test_pixel_imperfect() {
 }
 
 void test_widgets() {
-  ekg::sampler_t &check {loaded_sampler_list.emplace_back()};
-  generate_char_sampler(&check, "✔", ekg::io::font_face_type::text);
+  app.loaded_sampler_list.emplace_back();
+  app.loaded_sampler_list.emplace_back();
 
-  ekg::sampler_t &meow {loaded_sampler_list.emplace_back()};
+  ekg::sampler_t &check {app.loaded_sampler_list.at(0)};
+  generate_char_sampler(&check, "✔", ekg::io::font_face_type::emojis);
+
+  ekg::sampler_t &meow {app.loaded_sampler_list.at(1)};
   generate_char_sampler(&meow, "🐈", ekg::io::font_face_type::emojis);
 
   auto bla = ekg::frame_t {
@@ -126,6 +137,7 @@ void test_widgets() {
     .rect = {500.0f, 200.0f, 200.0f, 200.0f},
     .drag_dock = ekg::dock::top,
     .resize_dock = ekg::dock::left | ekg::dock::bottom | ekg::dock::right
+
   };
 
   ekg::frame_t &oi = ekg::make(bla);
@@ -149,8 +161,28 @@ void test_widgets() {
   checkbox.text = "must meow ✔";
   checkbox.dock = ekg::dock::fill | ekg::dock::next;
   ekg::checkbox_t &mustmeow = ekg::make(checkbox);
+  mustmeow.theme.layers[ekg::checkbox_t::box][ekg::layer::active] = &meow;
 
-  mustmeow.theme.layers[ekg::checkbox_t::box][ekg::layer::active] = &check;
+  for (uint32_t it {}; it < 64; it++) {
+    checkbox.tag = "bt1";
+    checkbox.text = "must meow ✔ " + std::to_string(it);
+    checkbox.dock = ekg::dock::fill | ekg::dock::next;
+    ekg::checkbox_t &mustmeow = ekg::make(checkbox);
+    mustmeow.theme.layers[ekg::checkbox_t::box][ekg::layer::active] = &meow;
+  }
+
+  ekg::make(ekg::scrollbar_t {.tag = "oiimeowyou"});
+  ekg::pop();
+
+  ekg::frame_t &tweaks = ekg::make(bla);
+  oi.theme.layers[ekg::layer::background] = &meow;
+
+  checkbox.tag = "vsync";
+  checkbox.text = "";
+  ekg::checkbox_t &vsync = ekg::make(checkbox);
+
+  vsync.value.move(&app.vsync);
+  vsync.text.move(&app.fps);
 
   ekg::pop();
 }
@@ -161,6 +193,7 @@ int32_t main(int32_t, char**) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+  SDL_GL_SetSwapInterval(0);
 
   app.p_sdl_win = {
     SDL_CreateWindow(
@@ -200,7 +233,19 @@ int32_t main(int32_t, char**) {
 
   test_widgets();
 
+  ekg::timing_t framerate {};
+  uint64_t elapsed_frame_count {};
+  uint64_t last_frame_count {1};
+
   while (app.is_running) {
+    if (ekg::reset_if_reach(&framerate, 1000)) {
+      SDL_GL_SetSwapInterval(app.vsync);
+      app.fps = std::to_string(elapsed_frame_count) + ", " + std::to_string(ekg::viewport.dt);
+      last_frame_count = elapsed_frame_count;
+      elapsed_frame_count = 0;
+      ekg::viewport.redraw = true;
+    }
+
     while (SDL_PollEvent(&sdl_event)) {
       if (sdl_event.type == SDL_QUIT) {
         app.is_running = false;
@@ -215,13 +260,15 @@ int32_t main(int32_t, char**) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0.0f, 0.0f, ekg::viewport.w, ekg::viewport.h);
 
-    ekg::viewport.dt = 0.016f;
+    ekg::viewport.dt = 1.0f / last_frame_count;
     ekg::render();
 
     SDL_GL_SwapWindow(app.p_sdl_win);
 
+    ++elapsed_frame_count;
+
     if (app.vsync) {
-      SDL_Delay(16);
+      SDL_Delay(6);
     }
   }
 

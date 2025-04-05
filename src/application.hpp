@@ -6,8 +6,10 @@
 
 extern struct application_t {
   SDL_Window *p_sdl_win {};
+  std::string fps {};
   bool vsync {true};
   bool is_running {};
+  std::vector<ekg::sampler_t> loaded_sampler_list {};
 } app;
 
 namespace laboratory {
