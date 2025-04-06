@@ -10,6 +10,7 @@ extern struct application_t {
   bool vsync {true};
   bool is_running {};
   std::vector<ekg::sampler_t> loaded_sampler_list {};
+  std::vector<ekg::task_t> loaded_task_list {};
 } app;
 
 namespace laboratory {

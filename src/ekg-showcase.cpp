@@ -137,7 +137,6 @@ void test_widgets() {
     .rect = {500.0f, 200.0f, 200.0f, 200.0f},
     .drag_dock = ekg::dock::top,
     .resize_dock = ekg::dock::left | ekg::dock::bottom | ekg::dock::right
-
   };
 
   ekg::frame_t &oi = ekg::make(bla);
@@ -163,12 +162,23 @@ void test_widgets() {
   ekg::checkbox_t &mustmeow = ekg::make(checkbox);
   mustmeow.theme.layers[ekg::checkbox_t::box][ekg::layer::active] = &meow;
 
+  static ekg::task_t task {
+    .info = {
+      .tag = "bla"
+    },
+    .function = [](ekg::info_t &info) {
+      if (info.p_properties == nullptr) {
+        return;
+      }
+
+      ekg::log() << info.tag << " " << info.p_properties->tag;
+    }
+  };
+
   for (uint32_t it {}; it < 64; it++) {
-    checkbox.tag = "bt1";
-    checkbox.text = "must meow ✔ " + std::to_string(it);
-    checkbox.dock = ekg::dock::fill | ekg::dock::next;
     ekg::checkbox_t &mustmeow = ekg::make(checkbox);
     mustmeow.theme.layers[ekg::checkbox_t::box][ekg::layer::active] = &meow;
+    mustmeow.actions[ekg::action::active] = &task;
   }
 
   ekg::make(ekg::scrollbar_t {.tag = "oiimeowyou"});
