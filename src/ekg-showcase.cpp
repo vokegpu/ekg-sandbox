@@ -125,55 +125,52 @@ void test_pixel_imperfect() {
 void test_widgets() {
   app.loaded_sampler_list.emplace_back();
   app.loaded_sampler_list.emplace_back();
+  app.loaded_sampler_list.emplace_back();
 
   ekg::sampler_t &check {app.loaded_sampler_list.at(0)};
   generate_char_sampler(&check, "✔", ekg::io::font_face_type::emojis);
 
-  ekg::sampler_t &meow {app.loaded_sampler_list.at(1)};
-  generate_char_sampler(&meow, "🐈", ekg::io::font_face_type::emojis);
-
-  auto bla = ekg::frame_t {
+  auto frame = ekg::frame_t {
     .tag = "bla",
     .rect = {500.0f, 200.0f, 200.0f, 200.0f},
     .drag_dock = ekg::dock::top,
     .resize_dock = ekg::dock::left | ekg::dock::bottom | ekg::dock::right
   };
 
-  ekg::frame_t &oi = ekg::make(bla);
-  oi.theme.layers[ekg::layer::background] = &meow;
-
   ekg::label_t label {};
   label.tag = "idk";
   label.text = "MEOW OWER MEOW";
   label.dock = ekg::dock::fill;
   label.text_dock = ekg::dock::center;
-  ekg::make(label);
-
-  ekg::button_t button {};
-  button.tag = "bt1";
-  button.text = "click hewe";
-  button.dock = ekg::dock::fill | ekg::dock::next;
-  ekg::make(button);
 
   ekg::checkbox_t checkbox {};
   checkbox.tag = "bt1";
   checkbox.text = "must meow ✔";
   checkbox.dock = ekg::dock::fill | ekg::dock::next;
-  ekg::checkbox_t &mustmeow = ekg::make(checkbox);
-  mustmeow.theme.layers[ekg::checkbox_t::box][ekg::layer::active] = &meow;
 
   static ekg::task_t task {
     .info = {
-      .tag = "bla"
+      .tag = "i-do-meow"
     },
     .function = [](ekg::info_t &info) {
       if (info.p_properties == nullptr) {
         return;
       }
 
-      ekg::log() << info.tag << " " << info.p_properties->tag;
+      ekg::log() << info.tag;
     }
   };
+
+  ekg::sampler_t &meow {app.loaded_sampler_list.at(1)};
+  generate_char_sampler(&meow, "🐈", ekg::io::font_face_type::emojis);
+
+  ekg::sampler_t &seal {app.loaded_sampler_list.at(2)};
+  generate_char_sampler(&seal, "🦭", ekg::io::font_face_type::emojis);
+
+  ekg::frame_t &cats = ekg::make(frame);
+  cats.theme.layers[ekg::layer::background] = &meow;
+
+  ekg::make(label);
 
   for (uint32_t it {}; it < 64; it++) {
     ekg::checkbox_t &mustmeow = ekg::make(checkbox);
@@ -181,11 +178,16 @@ void test_widgets() {
     mustmeow.actions[ekg::action::active] = &task;
   }
 
-  ekg::make(ekg::scrollbar_t {.tag = "oiimeowyou"});
+  ekg::scrollbar_t &scrollbar {ekg::make(ekg::scrollbar_t {.tag = "oiimeowyou"})};
+  scrollbar.theme.layers[ekg::scrollbar_t::vertical][ekg::layer::highlight] = &meow;
+  scrollbar.theme.layers[ekg::scrollbar_t::vertical][ekg::layer::background] = &seal;
+  scrollbar.theme.outline.w = 0.0f;
+  scrollbar.theme.pixel_thickness = 30;
+
   ekg::pop();
 
-  ekg::frame_t &tweaks = ekg::make(bla);
-  oi.theme.layers[ekg::layer::background] = &meow;
+  ekg::frame_t &tweaks = ekg::make(frame);
+  tweaks.theme.layers[ekg::layer::background] = &meow;
 
   checkbox.tag = "vsync";
   checkbox.text = "";
@@ -193,6 +195,12 @@ void test_widgets() {
 
   vsync.value.move(&app.vsync);
   vsync.text.move(&app.fps);
+
+  ekg::button_t button {};
+  button.tag = "bt1";
+  button.text = "click hewe";
+  button.dock = ekg::dock::fill | ekg::dock::next;
+  ekg::make(button);
 
   ekg::pop();
 }
