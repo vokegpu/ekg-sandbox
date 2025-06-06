@@ -129,7 +129,7 @@ bool create_sampler(
     .p_tag = sampler_name.data()
   };
 
-  sampler_alloc_info.p_data = {
+  sampler_alloc_info.pv_data = {
     static_cast<t>(
       stbi_load(
         sampler_name.data(),
@@ -141,7 +141,7 @@ bool create_sampler(
     )
   };
 
-  if (!sampler_alloc_info.p_data) {
+  if (!sampler_alloc_info.pv_data) {
     ekg::log() << "Failed to load '" << sampler_name << "' sampler ><!";
     return false;
   }
@@ -218,7 +218,7 @@ bool load_ttf_emoji(ekg::gpu::sampler_t *p_sampler) {
 
   FT_Load_Char(
     typography_font_face.ft_face,
-    ekg::utf_string_to_char32("🐮"),
+    ekg::utf8_to_utf32("🐮"),
     FT_LOAD_RENDER | FT_LOAD_COLOR | FT_LOAD_DEFAULT
   );
 
@@ -235,7 +235,7 @@ bool load_ttf_emoji(ekg::gpu::sampler_t *p_sampler) {
   sampler_alloc_info.gl_format = GL_BGRA;
   sampler_alloc_info.gl_type = GL_UNSIGNED_BYTE;
   sampler_alloc_info.gl_generate_mipmap = GL_TRUE;
-  sampler_alloc_info.p_data = typography_font_face.ft_face->glyph->bitmap.buffer;
+  sampler_alloc_info.pv_data = typography_font_face.ft_face->glyph->bitmap.buffer;
 
   return ekg::allocate_sampler(
     &sampler_alloc_info,
@@ -371,11 +371,11 @@ public:
   message_gui() {
     task.info = {
       .tag = "msg-send meow meowmeow",
-      .p_data = this
+      .pv_data = this
     };
 
     task.function = [](ekg::info &info) {
-      message_gui::send(static_cast<message_gui*>(info.p_data));
+      message_gui::send(static_cast<message_gui*>(info.pv_data));
     };
 
     this->stack.tag = "msg-gui";
@@ -416,7 +416,7 @@ void multithreading_update(uint64_t *p_async_fps, ekg::runtime *p_ekg_runtime) {
       fps = 1000 / *p_async_fps;
     }
 
-    p_ekg_runtime->service_handler.on_update();
+    p_ekg_runtime->service_handler.update();
     std::this_thread::sleep_for(std::chrono::microseconds(16));
   }
 }
@@ -468,7 +468,7 @@ int32_t showcase_useless_window() {
     .p_ft_library = &ft_library, 
     //.p_gpu_api = new ekg::os::opengl("#version 300 es \nprecision highp float;"),
     .p_gpu_api = new ekg::os::opengl("#version 330"),
-    .p_os_platform = new ekg::os::sdl(app.p_sdl_win)
+    .p_platform_base = new ekg::os::sdl(app.p_sdl_win)
   };
 
   ekg::runtime runtime {};
@@ -547,7 +547,7 @@ int32_t showcase_useless_window() {
         },
         .function = [](ekg::info &task_info) {
           SDL_Event sdl_event_quit {};
-          sdl_event_quit.type = SDL_QUIT;
+          sdl_event_quit.flags = SDL_QUIT;
           SDL_PushEvent(&sdl_event_quit);
 
           ekg::log() << "task executed: " << task_info.tag;
@@ -718,10 +718,10 @@ int32_t showcase_useless_window() {
       new ekg::task {
         .info = {
           .tag = "oi eu amo pastel com beijinho",
-          .p_data = &content
+          .pv_data = &content
         },
         .function = [](ekg::info &info) {
-          auto &content = *static_cast<ekg::item*>(info.p_data);
+          auto &content = *static_cast<ekg::item*>(info.pv_data);
           for (uint64_t it {}; it < content.size(); it++) {
             content.at(it).erase(content.at(it).begin(), content.at(it).begin() + 1); // remove first element or meow
           }
@@ -971,7 +971,7 @@ int32_t showcase_useless_window() {
       fps->set_value(
         "FPS: " + std::to_string(frame_couting) +
         " DT: " + std::to_string(ekg::ui::dt) +
-        " GD: " + std::to_string(ekg::gpu::allocator::current_rendering_data_count)
+        " GD: " + std::to_string(ekg:)
       );
 
       frame_couting = 0;
@@ -1001,7 +1001,7 @@ int32_t showcase_useless_window() {
         );
       }
 
-      ekg::utf_decode(ekg::log::buffer.str(), p_terminal->get_value());
+      ekg::utf8_split_new_line(ekg::log::buffer.str(), p_terminal->get_value());
     }
 
     ekg::update();
@@ -1045,7 +1045,7 @@ void test_out_of_context_uis() {
   std::string_view listbox_can_open {"▶"};
   std::string_view listbox_can_close {"▼"};
 
-  std::cout << "listbox: " << ekg::utf_string_to_char32(minecraft) << ", " << ekg::utf_string_to_char32(listbox_can_close) << std::endl;
+  std::cout << "listbox: " << ekg::utf8_to_utf32(minecraft) << ", " << ekg::utf8_to_utf32(listbox_can_close) << std::endl;
 
   for (ekg::ui::label &label : label_list) {
     //label.set_value("oi meow");
@@ -1059,10 +1059,10 @@ void test_out_of_context_uis() {
   };
 
   std::string_view vacas {"字"};
-  std::cout << "vacas: " << ekg::utf_string_to_char32(vacas) << std::endl;
+  std::cout << "vacas: " << ekg::utf8_to_utf32(vacas) << std::endl;
 
   std::vector<std::string> oi_eu_amo_vacas {};
-  ekg::utf_decode(vakinha_mumu, oi_eu_amo_vacas);
+  ekg::utf8_split_new_line(vakinha_mumu, oi_eu_amo_vacas);
 
   for (std::string &mumu : oi_eu_amo_vacas) {
     std::cout << mumu << std::endl;
@@ -1102,7 +1102,7 @@ int32_t laboratory_testing() {
     //.p_font_path_emoji = "twemoji.ttf",
     .p_gpu_api = new ekg::os::opengl("#version 300 es \nprecision highp float;"),
     //.p_gpu_api = new ekg::os::opengl("#version 450"),
-    .p_os_platform = new ekg::os::sdl(app.p_sdl_win)
+    .p_platform_base = new ekg::os::sdl(app.p_sdl_win)
   };
 
   ekg::runtime runtime {};
@@ -1270,7 +1270,7 @@ int32_t laboratory_testing() {
         },
         .function = [](ekg::info &task_info) {
           SDL_Event sdl_event_quit {};
-          sdl_event_quit.type = SDL_QUIT;
+          sdl_event_quit.flags = SDL_QUIT;
           SDL_PushEvent(&sdl_event_quit);
 
           ekg::log() << "task executed: " << task_info.tag;
@@ -1430,10 +1430,10 @@ int32_t laboratory_testing() {
       new ekg::task {
         .info = {
           .tag = "oi eu amo pastel com beijinho",
-          .p_data = &content
+          .pv_data = &content
         },
         .function = [](ekg::info &info) {
-          auto &content = *static_cast<ekg::item*>(info.p_data);
+          auto &content = *static_cast<ekg::item*>(info.pv_data);
           for (uint64_t it {}; it < content.size(); it++) {
             content.at(it).erase(content.at(it).begin(), content.at(it).begin() + 1); // remove first element or meow
           }
@@ -1625,7 +1625,7 @@ int32_t laboratory_testing() {
         },
         .function = [](ekg::info &task_info) {
           SDL_Event sdl_event_quit {};
-          sdl_event_quit.type = SDL_QUIT;
+          sdl_event_quit.flags = SDL_QUIT;
           SDL_PushEvent(&sdl_event_quit);
 
           ekg::log() << "task executed: " << task_info.tag;
@@ -1710,7 +1710,7 @@ int32_t laboratory_testing() {
     }
 
     while (SDL_PollEvent(&sdl_event)) {
-      if (sdl_event.type == SDL_QUIT) {
+      if (sdl_event.flags == SDL_QUIT) {
         running = false;
       }
       ekg::os::sdl_poll_event(sdl_event);
