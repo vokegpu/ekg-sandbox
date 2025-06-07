@@ -32,6 +32,18 @@ void test_pixel_imperfect() {
 }
 
 void test_widgets() {
+  ekg::stack_t meow {
+    .tag = "moo"
+  };
+
+  ekg::frame_t frame_template {
+    .tag = "meows",
+    .rect = {20.0f, 20.0f, 200.0f, 200.0f},
+    .drag = ekg::dock::top,
+    .resize = ekg::dock::left | ekg::dock::right | ekg::dock::bottom
+  };
+
+  auto &my_frame {ekg::make<ekg::frame_t>(frame_template)};
 }
 
 int32_t main(int32_t, char**) {
@@ -59,12 +71,29 @@ int32_t main(int32_t, char**) {
 
   app.is_running = true;
 
+  ekg::ft_library ft_library {};
+  FT_Init_FreeType(&ft_library);
+
+  ekg::runtime_properties_info_t runtime_properties_info {
+    .default_font_path_text = "./comic-mono.ttf",
+    .default_font_path_emoji = "./twemoji.ttf",
+    .p_platform_base = new ekg::sdl2(app.p_sdl_win),
+    .p_gpu_api = new ekg::opengl(),
+    .ft_library = ft_library
+  };
+
+  ekg::runtime_t ekg_runtime {};
+  ekg::init(
+    runtime_properties_info,
+    &ekg_runtime
+  );
+
   ekg::gui.ui.redraw = true;
   ekg::flags_t resize {
     ekg::dock::left | ekg::dock::bottom | ekg::dock::right
   };
 
-  ekg::dpi.auto_scale = false;
+  ekg::dpi.auto_scale = true;
   ekg::dpi.scale = {0.0f, 0.0f, 800.0f, 600.0f};
 
   ekg::rgba_t<float> clear_color {0.3f, 0.22f, 0.7f, 1.0f};
@@ -87,7 +116,7 @@ int32_t main(int32_t, char**) {
         app.is_running = false;
       }
 
-      //ekg::sdl2_poll_event(sdl_event);
+      ekg::sdl2_poll_event(sdl_event);
     }
 
     ekg::update();
