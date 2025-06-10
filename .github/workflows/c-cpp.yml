@@ -13,4 +13,10 @@ jobs:
       - name: APTs
         run: |
           sudo apt update
-          sudo apt-get install mingw-w64-freetype
+          sudo apt-get install g++-mingw-w64-x86-64
+
+          git clone https://github.com/freetype/freetype
+          cd ./freetype
+          ./configure --host=x86_64-w64-mingw32 --disable-static
+          make
+          make install
