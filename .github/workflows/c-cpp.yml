@@ -1,11 +1,5 @@
 name: CMake Worker
 
-on:
-  push:
-    branches: [ "version-core" ]
-  pull_request:
-    branches: [ "version-core" ]
-
 jobs:
   release:  
     name: Release
