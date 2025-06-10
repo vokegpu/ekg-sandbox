@@ -13,4 +13,4 @@ jobs:
       - name: APTs
         run: |
           sudo apt update
-          sudo apt-get mingw-w64-x86_64-freetype
+          sudo apt-get install mingw-w64-x86_64-freetype
