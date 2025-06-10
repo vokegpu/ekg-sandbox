@@ -54,6 +54,7 @@ jobs:
           yes | sudo cp -r ./mingw64/* /usr/x86_64-w64-mingw32/
 
           git clone https://github.com/vokegpu/ekg-ui-library --depth 1
+          
           cd ./ekg-ui-library
 
       - name: Configure Linux-CMake
