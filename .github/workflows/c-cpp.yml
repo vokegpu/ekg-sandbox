@@ -17,6 +17,5 @@ jobs:
 
           git clone https://github.com/freetype/freetype
           cd ./freetype
-          ./configure --host=x86_64-w64-mingw32 --disable-static
-          make
+          make PLATFORM=windows
           make install
