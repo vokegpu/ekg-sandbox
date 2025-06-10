@@ -1,22 +1,102 @@
-name: C/C++ CI
+name: CMake Worker
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "version-core" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "version-core" ]
 
 jobs:
-  build:
+  release:  
+    name: Release
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
     steps:
-      - name: APTs
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - uses: fregante/setup-git-user@v2
+    
+      - name: Install Ninja
+        uses: ashutoshvarma/setup-ninja@master
+
+      - name: Linux Install Libraries
         run: |
+          wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-noble.list http://packages.lunarg.com/vulkan/lunarg-vulkan-noble.list
+          
           sudo apt update
-          sudo apt-get install gcc-mingw-w64-x86-64
+          sudo apt install vulkan-sdk
+
+          sudo apt-get install gcc-mingw-w64 gcc-mingw-w64-x86-64 g++-mingw-w64 mingw-w64-tools mingw-w64-x86-64-dev
+          sudo apt-get install libfreetype6-dev libsdl2-dev libglew-dev libopengl-dev libglx-dev libgl1-mesa-dev libglfw3-dev
 
           git clone https://github.com/MrsRina/freetype-mingw64-w64-support
           cd ./freetype-mingw64-w64-support
           cmake -S . -B ./cmake-build -G Ninja -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -D FORCE_WINDOWS=1 -D CMAKE_INSTALL_PREFIX=/usr/local/
           cmake --build ./cmake-build
           sudo cmake --install ./cmake-build
+          cd ..
+
+          wget https://github.com/libsdl-org/SDL/releases/download/release-2.30.2/SDL2-devel-2.30.2-mingw.zip
+          unzip ./SDL2-devel-2.30.2-mingw.zip
+          sudo cp -r ./SDL2-2.30.2/x86_64-w64-mingw32/* /usr/x86_64-w64-mingw32
+
+          wget https://github.com/vokegpu/.github/releases/download/cross-platform-mingw/x86_64-w64-mingw32.zip
+          unzip ./x86_64-w64-mingw32.zip
+          yes | sudo cp -r ./x86_64-w64-mingw32/* /usr/x86_64-w64-mingw32/
+
+          wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-freetype-2.13.3-1-any.pkg.tar.zst
+          tar --use-compress-program=unzstd -xvf ./mingw-w64-x86_64-freetype-2.13.3-1-any.pkg.tar.zst
+          yes | sudo cp -r ./mingw64/* /usr/x86_64-w64-mingw32/
+
+          git clone https://github.com/vokegpu/ekg-ui-library --depth 1
+          cd ./ekg-ui-library
+
+      - name: Configure Linux-CMake
+        run: >
+          cmake -B ${{ github.workspace }}/cmake-build-debug
+          -S ${{ github.workspace }}
+          -G Ninja
+          -DCMAKE_CXX_COMPILER=g++
+          -DEKG_ENABLE_TEST=0
+          -DEKG_LINUX_NOT_FOUND_FREETYPE=1
+          -DEKG_FORCE_LINUX=1
+
+      - name: Build Linux-CMake
+        run: |
+          cmake --build ${{ github.workspace }}/cmake-build-debug
+          sudo rm -r -f ${{ github.workspace }}/cmake-build-debug
+
+      - name: Configure Windows-CMake
+        run: >
+          cmake -B ${{ github.workspace }}/cmake-build-debug
+          -S ${{ github.workspace }}
+          -G Ninja
+          -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
+          -DEKG_ENABLE_TEST=0
+          -DEKG_LINUX_NOT_FOUND_FREETYPE=1
+          -DEKG_FORCE_WINDOWS=1
+
+      - name: Build Windows-CMake
+        run: |
+          cmake --build ${{ github.workspace }}/cmake-build-debug
+
+      - name: Read Title
+        id: commit_title
+        run: echo ::set-output name=message::$(git log --format=%B -n 1 ${{ github.sha }})
+
+      - name: Read Description
+        id: commit_description
+        run: echo ::set-output name=message::$(git log --format=%B -n 1 ${{ github.sha }} | sed -n '2,$p')
+
+      - name: Release if Needed
+        if: startsWith(steps.commit_title.outputs.message, '[release]')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd ${{ github.workspace }}
+          python ./version/autorelease.py -m ${{ steps.commit_title.outputs.message }} -d ${{ steps.commit_description.outputs.message }}
