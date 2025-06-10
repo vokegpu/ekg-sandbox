@@ -13,10 +13,10 @@ jobs:
       - name: APTs
         run: |
           sudo apt update
-          sudo apt-get install gcc-mingw-w64-x86-64
+          sudo apt-get install gcc-mingw-w64-x86-64 ninja
 
           git clone https://github.com/freetype/freetype
           cd ./freetype
-          cmake -S . -B ./cmake-build -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -D WIN32=1
+          cmake -S . -B ./cmake-build -G Ninja -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -D WIN32=1
           cmake --build ./cmake-build
           sudo cmake --install
