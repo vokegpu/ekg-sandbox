@@ -13,7 +13,7 @@ jobs:
       - name: APTs
         run: |
           sudo apt update
-          sudo apt-get install gcc-mingw-w64-x86-64 ninja
+          sudo apt-get install gcc-mingw-w64-x86-64
 
           git clone https://github.com/MrsRina/freetype-mingw64-w64-support
           cd ./freetype
