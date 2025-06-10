@@ -17,6 +17,6 @@ jobs:
 
           git clone https://github.com/freetype/freetype
           cd ./freetype
-          cmake -S . -B ./cmake-build -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc
+          cmake -S . -B ./cmake-build -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -D WIN32=1
           cmake --build ./cmake-build
           sudo cmake --install
