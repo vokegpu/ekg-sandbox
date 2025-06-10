@@ -1,5 +1,10 @@
 name: CMake Worker
 
+on:
+  push:
+    branches:
+      - "**"
+
 jobs:
   release:  
     name: Release
