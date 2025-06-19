@@ -126,7 +126,7 @@ bool create_sampler(
   return false;
   #else
   ekg::gpu::sampler_allocate_info sampler_alloc_info {
-    .p_tag = sampler_name.data()
+    .tag = sampler_name.data()
   };
 
   sampler_alloc_info.pv_data = {
@@ -188,7 +188,7 @@ std::string checkcalc(std::string_view text, std::string_view operatortext) {
 
 bool load_ttf_emoji(ekg::gpu::sampler_t *p_sampler) {
   ekg::gpu::sampler_allocate_info sampler_alloc_info {
-    .p_tag = "meow"
+    .tag = "meow"
   };
 
   ekg::draw::font_renderer f_renderer {ekg::f_renderer(ekg::font::normal)};

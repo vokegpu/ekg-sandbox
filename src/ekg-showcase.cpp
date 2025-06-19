@@ -32,9 +32,13 @@ void test_pixel_imperfect() {
 }
 
 void test_widgets() {
-  ekg::stack_t meow {
-    .tag = "moo"
-  };
+  ekg::make<ekg::stack_t>(
+    {
+      .tag = "moo"
+    }
+  );
+
+  ekg::flags_t next_fill {ekg::dock::next | ekg::dock::fill};
 
   ekg::frame_t frame_template {
     .tag = "meows",
@@ -43,7 +47,55 @@ void test_widgets() {
     .resize = ekg::dock::left | ekg::dock::right | ekg::dock::bottom
   };
 
-  auto &my_frame {ekg::make<ekg::frame_t>(frame_template)};
+  ekg::button_t buttons {
+    .tag = "to-click ><",
+    .dock = next_fill,
+    .checks = {{.text = "cliwck hewe"}}
+  };
+
+  buttons.rect.w = 200.0f;
+  for (size_t it {}; it < 3; it++) {
+    auto &my_frame {ekg::make<ekg::frame_t>(frame_template)};
+
+    ekg::make<ekg::button_t>(buttons)
+      .checks = {{.text = "amo vc", .box = ekg::dock::left}, {.text = "meow", .box = ekg::dock::left}};
+
+    auto &my = ekg::make<ekg::button_t>(buttons);
+
+    my.checks = {
+      {.text = "lcikc"},
+      {.text = "lcikc", .dock = ekg::dock::right | ekg::dock::top},
+      {.text = "lcikc"},
+      {.text = "lcikc"}
+    };
+
+    ekg::make<ekg::button_t>(buttons);
+
+    auto &a = ekg::query<ekg::button_t>(my.at);
+    auto &p = ekg::query<ekg::property_t>(a.property_at);
+    ekg_log_low_level(p.at.flags);
+
+    ekg::label_t mu {
+      .tag = "pompom",
+      .text = "oi eu sou uma vaca sabia",
+      .dock = next_fill,
+      .dock_text = ekg::dock::center
+    };
+
+    ekg::make<ekg::label_t>(mu);
+
+    for (size_t it {}; it < 30; it++) {
+      mu.text = "i like to meowmoo " + std::to_string(it);
+      ekg::make<ekg::label_t>(mu);
+    }
+
+    ekg::make<ekg::scrollbar_t>({.tag = "oi eu queria miar e miar que nem uma vaca c"});
+  }
+
+  ekg::slider_t meow {};
+  meow.ranges.emplace_back().value<float>() = 32432.0f;
+  ekg_log_low_level(meow.ranges[0].value<float>());
+  app.meows.push_back(meow);
 }
 
 int32_t main(int32_t, char**) {
@@ -93,11 +145,10 @@ int32_t main(int32_t, char**) {
     ekg::dock::left | ekg::dock::bottom | ekg::dock::right
   };
 
-  ekg::dpi.auto_scale = true;
+  ekg::dpi.auto_scale = false;
   ekg::dpi.scale = {0.0f, 0.0f, 800.0f, 600.0f};
 
-  ekg::rgba_t<float> clear_color {0.3f, 0.22f, 0.7f, 1.0f};
-
+  ekg::rgba_t<float> clear_color {0.1f, 0.1f, 0.1f, 1.0f};
   test_widgets();
 
   ekg::timing_t framerate {};
@@ -109,6 +160,8 @@ int32_t main(int32_t, char**) {
       SDL_GL_SetSwapInterval(app.vsync);
       last_frame_count = elapsed_frame_count;
       elapsed_frame_count = 0;
+      ekg_log_low_level("fps: " << last_frame_count << " " << ekg::metrics.gpu_data_count);
+      ekg_log_low_level(app.meows[0].ranges[0].value<float>());
     }
 
     while (SDL_PollEvent(&sdl_event)) {

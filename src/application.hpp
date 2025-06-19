@@ -11,6 +11,7 @@ extern struct application_t {
   bool is_running {};
   std::vector<ekg::sampler_t> loaded_sampler_list {};
   std::vector<ekg::callback_t> loaded_task_list {};
+  std::vector<ekg::slider_t> meows {};
 } app;
 
 #endif
