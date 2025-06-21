@@ -162,8 +162,8 @@ void test_widgets() {
     }
   };
 
-  ekg_log_low_level("oi eu sou uma vaca " << meow.ranges[0].value.as<float>());
-  app.meows.push_back(meow);
+  //ekg_log_low_level("oi eu sou uma vaca " << meow.ranges[0].value.as<float>());
+  //app.meows.push_back(meow);
 }
 
 int32_t main(int32_t, char**) {
