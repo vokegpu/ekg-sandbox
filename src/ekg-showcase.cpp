@@ -31,6 +31,50 @@ void test_pixel_imperfect() {
 
 }
 
+void test_numbers() {
+  ekg::slider_t slider {};
+
+  slider.ranges.emplace_back().value.as<double>() = 64.0;
+  ekg::assert(slider.ranges[0].value.get_type_info_hash() == ekg::ui::f64);
+  ekg_log_low_level("f64: " << ekg::ui::f64);
+
+  slider.ranges.emplace_back().value.as<float>() = 32.0f;
+  ekg::assert(slider.ranges[1].value.get_type_info_hash() == ekg::ui::f32);
+  ekg_log_low_level("f32: " << ekg::ui::f32);
+
+  slider.ranges.emplace_back().value.as<uint64_t>() = 64;
+  ekg::assert(slider.ranges[2].value.get_type_info_hash() == ekg::ui::u64);
+  ekg_log_low_level("u64: " << ekg::ui::u64);
+
+  slider.ranges.emplace_back().value.as<int64_t>() = 64;
+  ekg::assert(slider.ranges[3].value.get_type_info_hash() == ekg::ui::i64);
+  ekg_log_low_level("i64: " << ekg::ui::i64);
+
+  slider.ranges.emplace_back().value.as<uint32_t>() = 32;
+  ekg::assert(slider.ranges[4].value.get_type_info_hash() == ekg::ui::u32);
+  ekg_log_low_level("u32: " << ekg::ui::u32);
+
+  slider.ranges.emplace_back().value.as<int32_t>() = 32;
+  ekg::assert(slider.ranges[5].value.get_type_info_hash() == ekg::ui::i32);
+  ekg_log_low_level("i32: " << ekg::ui::i32);
+
+  slider.ranges.emplace_back().value.as<uint16_t>() = 16;
+  ekg::assert(slider.ranges[6].value.get_type_info_hash() == ekg::ui::u16);
+  ekg_log_low_level("u16: " << ekg::ui::u16);
+
+  slider.ranges.emplace_back().value.as<int16_t>() = 16;
+  ekg::assert(slider.ranges[7].value.get_type_info_hash() == ekg::ui::i16);
+  ekg_log_low_level("i16: " << ekg::ui::i16);
+
+  slider.ranges.emplace_back().value.as<uint8_t>() = 8;
+  ekg::assert(slider.ranges[8].value.get_type_info_hash() == ekg::ui::u8);
+  ekg_log_low_level("u8: " << ekg::ui::u8);
+
+  slider.ranges.emplace_back().value.as<int8_t>() = 8;
+  ekg::assert(slider.ranges[9].value.get_type_info_hash() == ekg::ui::i8);
+  ekg_log_low_level("i8: " << ekg::ui::i8);
+}
+
 void test_widgets() {
   ekg::make<ekg::stack_t>(
     {
@@ -54,8 +98,17 @@ void test_widgets() {
   };
 
   buttons.rect.w = 200.0f;
-  for (size_t it {}; it < 3; it++) {
+  for (size_t it {}; it < 1; it++) {
     auto &my_frame {ekg::make<ekg::frame_t>(frame_template)};
+
+    ekg::make<ekg::slider_t>(
+      {
+        .tag = "meow amo miar",
+        .ranges = {
+          {.value = 16.0}
+        }
+      }
+    );
 
     ekg::make<ekg::button_t>(buttons)
       .checks = {{.text = "amo vc", .box = ekg::dock::left}, {.text = "meow", .box = ekg::dock::left}};
@@ -99,22 +152,17 @@ void test_widgets() {
   float b {36.0f};
   char*pb {(char*)(void*)&b};
 
-  //meow.ranges.emplace_back().memory_tape_value.get()[0] = pb[0];
-  //meow.ranges.at(0).memory_tape_value.get()[1] = pb[1];
-  //meow.ranges.at(0).memory_tape_value.get()[2] = pb[2];
-  //meow.ranges.at(0).memory_tape_value.get()[3] = pb[3];
+  meow.ranges = {
+    {
+      .value = 34.0f,
+      .min = 34.0f,
+      .max = 34.0f,
+      .dock = ekg::dock::left,
+      .dock_text = ekg::dock::left
+    }
+  };
 
-  meow.ranges.emplace_back();
-  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
-  //meow.ranges[0].value<float>() = 32.0f;
-  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
-  //float x {};
-  //meow.ranges[0].memory_tape_value.ownership(&x);
-  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
-  //meow.ranges[0].memory_tape_value.ownership(nullptr);
-  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
-  //ekg_log_low_level("buu eu queria ser uma vaca x " << &x);
-
+  ekg_log_low_level("oi eu sou uma vaca " << meow.ranges[0].value.as<float>());
   app.meows.push_back(meow);
 }
 
@@ -169,6 +217,7 @@ int32_t main(int32_t, char**) {
   ekg::dpi.scale = {0.0f, 0.0f, 800.0f, 600.0f};
 
   ekg::rgba_t<float> clear_color {0.1f, 0.1f, 0.1f, 1.0f};
+  test_numbers();
   test_widgets();
 
   ekg::timing_t framerate {};
