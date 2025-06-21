@@ -7,7 +7,7 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   set(
     PROPERTIES_COMPILE_OPTIONS
-    -O3
+    -O0
   )
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(

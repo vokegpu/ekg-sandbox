@@ -93,8 +93,28 @@ void test_widgets() {
   }
 
   ekg::slider_t meow {};
-  meow.ranges.emplace_back().value<float>() = 32432.0f;
-  ekg_log_low_level(meow.ranges[0].value<float>());
+  //meow.ranges.emplace_back().value<float>() = 32432.0f;
+  //ekg_log_low_level(meow.ranges[0].value<float>());
+
+  float b {36.0f};
+  char*pb {(char*)(void*)&b};
+
+  //meow.ranges.emplace_back().memory_tape_value.get()[0] = pb[0];
+  //meow.ranges.at(0).memory_tape_value.get()[1] = pb[1];
+  //meow.ranges.at(0).memory_tape_value.get()[2] = pb[2];
+  //meow.ranges.at(0).memory_tape_value.get()[3] = pb[3];
+
+  meow.ranges.emplace_back();
+  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
+  //meow.ranges[0].value<float>() = 32.0f;
+  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
+  //float x {};
+  //meow.ranges[0].memory_tape_value.ownership(&x);
+  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
+  //meow.ranges[0].memory_tape_value.ownership(nullptr);
+  //ekg_log_low_level("buu eu queria ser uma vaca gorda " << &meow.ranges[0].memory_tape_value.get());
+  //ekg_log_low_level("buu eu queria ser uma vaca x " << &x);
+
   app.meows.push_back(meow);
 }
 
@@ -161,7 +181,7 @@ int32_t main(int32_t, char**) {
       last_frame_count = elapsed_frame_count;
       elapsed_frame_count = 0;
       ekg_log_low_level("fps: " << last_frame_count << " " << ekg::metrics.gpu_data_count);
-      ekg_log_low_level(app.meows[0].ranges[0].value<float>());
+      //ekg_log_low_level(app.meows[0].ranges[0].value<float>());
     }
 
     while (SDL_PollEvent(&sdl_event)) {
