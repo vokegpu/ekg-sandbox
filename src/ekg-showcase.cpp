@@ -167,6 +167,8 @@ void test_widgets() {
 }
 
 int32_t main(int32_t, char**) {
+  test_numbers();
+
   SDL_Init(SDL_INIT_VIDEO);
 
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -217,7 +219,6 @@ int32_t main(int32_t, char**) {
   ekg::dpi.scale = {0.0f, 0.0f, 800.0f, 600.0f};
 
   ekg::rgba_t<float> clear_color {0.1f, 0.1f, 0.1f, 1.0f};
-  test_numbers();
   test_widgets();
 
   ekg::timing_t framerate {};
