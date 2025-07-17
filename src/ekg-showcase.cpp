@@ -83,6 +83,7 @@ void test_widgets() {
   );
 
   ekg::flags_t next_fill {ekg::dock::next | ekg::dock::fill};
+  ekg::button_t bt {.tag = "x", .dock = next_fill, .checks = {{.text = "\tclikcka"}}};
 
   ekg::frame_t frame_template {
     .tag = "meows",
@@ -104,20 +105,21 @@ void test_widgets() {
     ekg::make<ekg::slider_t>(
       {
         .tag = "meow amo miar",
+        .dock = next_fill,
         .ranges = {
-          {.value = 16.0}
+          {.value = 16.0, .min = 20.0, .max = 2000.0, .dock = ekg::dock::left | ekg::dock::fill}
         }
       }
     );
 
     ekg::make<ekg::button_t>(buttons)
-      .checks = {{.text = "amo vc", .box = ekg::dock::left}, {.text = "meow", .box = ekg::dock::left}};
+      .checks = {{.text = "amo vc", .box = ekg::dock::left}};
 
     auto &my = ekg::make<ekg::button_t>(buttons);
 
     my.checks = {
       {.text = "lcikc"},
-      {.text = "lcikc", .dock = ekg::dock::right | ekg::dock::top},
+      {.text = "lcikc", .dock = ekg::dock::left},
       {.text = "lcikc"},
       {.text = "lcikc"}
     };
@@ -145,14 +147,14 @@ void test_widgets() {
     ekg::make<ekg::scrollbar_t>({.tag = "oi eu queria miar e miar que nem uma vaca c"});
   }
 
-  ekg::slider_t meow {};
+  ekg::slider_t xx {};
   //meow.ranges.emplace_back().value<float>() = 32432.0f;
   //ekg_log_low_level(meow.ranges[0].value<float>());
 
   float b {36.0f};
   char*pb {(char*)(void*)&b};
 
-  meow.ranges = {
+  xx.ranges = {
     {
       .value = 34.0f,
       .min = 34.0f,
@@ -164,6 +166,91 @@ void test_widgets() {
 
   //ekg_log_low_level("oi eu sou uma vaca " << meow.ranges[0].value.as<float>());
   //app.meows.push_back(meow);
+  ekg::pop<ekg::frame_t>();
+
+  auto &xxxx = ekg::make<ekg::popup_t>({.tag = "oi"});
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::label_t>(ekg::popup_t::separator);
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::label_t>(ekg::popup_t::separator);
+  ekg::make<ekg::button_t>(bt);
+  ekg::pop<ekg::popup_t>();
+
+  //ekg::popup_t &meows {ekg::make<ekg::popup_t>()};
+  //ekg::make<ekg::button_t>(bt);
+  //ekg::make<ekg::button_t>(bt);
+  //ekg::pop<ekg::popup_t>();
+
+  auto &moo = ekg::make<ekg::popup_t>({.tag = ">3<"});
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::button_t>(bt);
+  ekg::pop<ekg::popup_t>();
+
+  auto &meow = ekg::make<ekg::popup_t>({.tag = ">2<", .links = {{"moo", moo.at}, {"xoo", xxxx.at}}});
+  //ekg::make<ekg::slider_t>({.tag ="muu", .dock = next_fill, .ranges = {{.value = 30.0f, .min = 20.0f, .max = 200.0f, .dock = ekg::dock::fill, .dock_text = ekg::dock::none}}});
+  bt.tag = "xoo";
+  ekg::make<ekg::button_t>(bt);
+  bt.tag = "moo";
+  ekg::make<ekg::label_t>(ekg::popup_t::separator);
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::button_t>(bt);
+  ekg::pop<ekg::popup_t>();
+
+  auto &c = ekg::make<ekg::callback_t>(
+    {
+      .info = {.tag = "meow"},
+      .lambda = [](ekg::info_t&) {
+        ekg_log_low_level("meowomeowmeowmeowme");
+      }
+    }
+  );
+
+  app.test_popup_at = 
+    ekg::make<ekg::popup_t>({.tag = ">1<", .links = {{"meow", meow.at}}}).at;
+  
+  bt.checks = {{.text = "pressiona", .box = ekg::dock::left}};
+  ekg::make<ekg::button_t>(bt);
+
+  bt.checks = {{.text = "oiiii"}};
+  auto &bx = ekg::make<ekg::button_t>(bt);
+  bx.checks[0].actions[ekg::action::active] = c.at;
+
+  bt.checks = {{.text = "clickas"}};
+  ekg::make<ekg::button_t>(bt);
+
+  ekg::make<ekg::label_t>(ekg::popup_t::separator);
+
+  bt.tag = "meow";
+  auto &f = ekg::make<ekg::frame_t>({.dock = next_fill, {.h = 200.0f}, .resize = ekg::dock::left | ekg::dock::bottom | ekg::dock::right});
+  ekg::make<ekg::button_t>(bt);
+  ekg::make<ekg::slider_t>(
+    {
+      .tag = "meow",
+      .dock = next_fill,
+      .ranges = {
+        {
+          .value = 50.0f, .min = 0.0f, .max = 100.0f,
+          .dock_text = ekg::dock::none,
+          .dock = ekg::dock::fill | ekg::dock::left
+        }
+      }
+    }
+  );
+
+  for (int i {}; i < 4; i++) {
+    bt.dock = next_fill;
+    ekg::make<ekg::button_t>(bt);
+  }
+
+  ekg::make<ekg::scrollbar_t>({});
+  ekg::pop<ekg::frame_t>();
+
+  ekg::make<ekg::scrollbar_t>({});
+  ekg::pop<ekg::popup_t>();
 }
 
 int32_t main(int32_t, char**) {
@@ -215,7 +302,7 @@ int32_t main(int32_t, char**) {
     ekg::dock::left | ekg::dock::bottom | ekg::dock::right
   };
 
-  ekg::dpi.auto_scale = false;
+  ekg::dpi.auto_scale = true;
   ekg::dpi.scale = {0.0f, 0.0f, 800.0f, 600.0f};
 
   ekg::rgba_t<float> clear_color {0.1f, 0.1f, 0.1f, 1.0f};
@@ -235,11 +322,16 @@ int32_t main(int32_t, char**) {
     }
 
     while (SDL_PollEvent(&sdl_event)) {
+      ekg::sdl2_poll_event(sdl_event);
+
       if (sdl_event.type == SDL_QUIT) {
         app.is_running = false;
       }
-
-      ekg::sdl2_poll_event(sdl_event);
+    
+      if (ekg::input("mouse-3")) {
+        ekg::show(app.test_popup_at, ekg::input().interact);
+        ekg_log_low_level("ayy cabron")
+      }
     }
 
     ekg::update();
