@@ -87,7 +87,7 @@ void test_widgets() {
 
   ekg::frame_t frame_template {
     .tag = "meows",
-    .rect = {20.0f, 20.0f, 200.0f, 200.0f},
+    .rect = {20.0f, 20.0f, 200.0f, 700.0f},
     .drag = ekg::dock::top,
     .resize = ekg::dock::left | ekg::dock::right | ekg::dock::bottom
   };
@@ -100,14 +100,25 @@ void test_widgets() {
 
   buttons.rect.w = 200.0f;
   for (size_t it {}; it < 1; it++) {
+    frame_template.rect.w = 600.0f;
     auto &my_frame {ekg::make<ekg::frame_t>(frame_template)};
+
+    auto &entry = ekg::make<ekg::textbox_t>({.tag = "meow", .dock = next_fill, .rect = {.scaled_height = 16}});
+    for (size_t it {}; it < 100; it++) {
+      entry.text.push_back("meow-meow");
+      entry.text.push_back("The quick brown fox jumps over the lazy dog;\nnisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit\neqndjqwbdiuqwybdihqwbdjhklbqwhkld");
+    }
 
     ekg::make<ekg::slider_t>(
       {
         .tag = "meow amo miar",
         .dock = next_fill,
         .ranges = {
-          {.value = 16.0, .min = 20.0, .max = 2000.0, .dock = ekg::dock::left | ekg::dock::fill}
+          {
+            .value = 16.0f,
+            .min = 20.0f,
+            .max = 2000.0f,
+            .dock = ekg::dock::left | ekg::dock::fill}
         }
       }
     );
@@ -253,7 +264,23 @@ void test_widgets() {
   ekg::pop<ekg::popup_t>();
 }
 
+void test_off() {
+  size_t i {};
+  ekg::text text {};
+
+  text.push_back("oii\ntudobem");
+  std::cout << text.length_of_lines() << std::endl;
+  std::cout << text.length_of_chars() << std::endl;
+  text.insert(0, "meow\nxu");
+
+  for (size_t it {}; it < text.length_of_lines(); it++) {
+    std::string charr {text.at(it)};
+    std::cout << charr << std::endl;
+  }
+}
+
 int32_t main(int32_t, char**) {
+  test_off();
   test_numbers();
 
   SDL_Init(SDL_INIT_VIDEO);
@@ -303,7 +330,7 @@ int32_t main(int32_t, char**) {
   };
 
   ekg::dpi.auto_scale = true;
-  ekg::dpi.scale = {0.0f, 0.0f, 800.0f, 600.0f};
+  ekg::dpi.scale = {0.0f, 0.0f, 1280.0f, 720.0f};
 
   ekg::rgba_t<float> clear_color {0.1f, 0.1f, 0.1f, 1.0f};
   test_widgets();
